@@ -15,39 +15,39 @@ int main()
 	int truematch[6];
 	int menu();
 	cout << "-------------------------------\n";
-	cout << "* Welcome to PowerBall! *\n";
+	cout << "* 欢迎来到强力球彩票！ *\n";
 	cout << "-------------------------------\n";
-	cout << "	-by Chris Grose\n\n";
-	cout << "Please enter your name [1 to 20 characters]: ";
+	cout << "	-by Chris Grose, edited by Inkorest\n\n";
+	cout << "请输入你的名字 [1 到 20 个字符]：";
 	cin.getline(name, 20);	//输入玩家姓名
-	cout << "\nWelcome " << name << "! Please enter your lucky number for seed: ";
+	cout << "\n欢迎 " << name << "！请输入你的幸运数字作为随机数种子：";
 	cin >> seed;	//输入随机数种子
 	srand(seed);
 	do
 	{	int num[5];	//输入所选的数字
 		int cp_num[6];	//CPU产生的数字
-		cout << "\n" << name << ", please enter your white ball numbers.\n";
+		cout << "\n" << name << "，请输入你的白色球号码。\n";
 		cout << "\n";
 		for (int j = 0; j < 5; j++)	//输入5个所选号码
-		{	cout << "Enter Ball # " << j + 1 << ": ";
+		{	cout << "输入球 #" << j + 1 << " 的号码：";
 			while (!(cin >> num[j]))	//在输入的同时对输入的类型和大小做限制
 			{	cin.clear();
 				while (!(cin.get() != '\n'))
 				continue;
-				cout << "Sorry, this is an invalid entry. Please enter a number between 1 and 48. Thank you!\n";
+				cout << "抱歉，这是一个非法输入。请输入介于 1 和 48 之间的一个数字。谢谢！\n";
 			}
 			if ((num[j] < 1))
-			{	cout << "Sorry, you have entered a number less than 0. Please enter a number between 1 and 48.\n";
+			{	cout << "抱歉，你输入了一个小于 0 的数字。请输入介于 1 和 48 之间的一个数字。\n";
 				j--;
 			}
 			if ((num[j] > 48))
-			{	cout << "Sorry, you have entered a number greater than 48. Please enter a number between 1 and 48.\n";
+			{	cout << "抱歉，你输入了一个大于 48 的数字。请输入介于 1 和 48 之间的一个数字。\n";
 				j--;
 			}
 		}
 		cout << '\n';
-		cout << name << ", please enter your PowerBall number: ";
-		cin >> PowerBall;	//要求玩家输入最后一个号码，叫做能量球
+		cout << name << "，请输入你的强力球号码：";
+		cin >> PowerBall;	//要求玩家输入最后一个号码，叫做强力球
 		cp_num[0] = getgamenbr();	//CPU产生6个随机号码
 		cp_num[1] = getgamenbr();
 		cp_num[2] = getgamenbr();
@@ -62,28 +62,28 @@ int main()
 		truematch[5] = isMatch(num[5], cp_num);
 		//输出最终结果
 		cout << "\n****************************";
-		cout<<"\nPlay # "<<play;
+		cout<<"\n游玩局数 #"<<play;
 		cout << "\n****************************\n";
 		cout << '\n';
-		cout << "The computer picks were: " << cp_num[0] << "	" << cp_num[1] << "	" << cp_num[2] << "	" << cp_num[3] << "	" << cp_num[4] << "	" << "PB"<<"	"<<cp_num[5] << '\n';
+		cout << "CPU 的选择为：\t" << cp_num[0] << '\t' << cp_num[1] << '\t' << cp_num[2] << '\t' << cp_num[3] << '\t' << cp_num[4] << '\t' << "PB" << '\t' << cp_num[5] << '\n';
 		cout << "-------------------------------\n";
-		cout << name << ", your picks were: " << num[0] << "	" << num[1] << "	" << num[2] << "	" << num[3] << "	" << num[4] << "	" << "PB" << "	" << PowerBall << '\n';
+		cout << name << "，你的选择为：\t" << num[0] << '\t' << num[1] << '\t' << num[2] << '\t' << num[3] << '\t' << num[4] << '\t' << "PB" << '\t' << PowerBall << '\n';
 		cout << "-------------------------------\n";
 		//显示比较结果
-		cout << name << ", your matches were: " << truematch[0] << "	" << truematch[1] << "	" << truematch[2] << "	" << truematch[3] << "	" << truematch[4] << "	" << "PB" << "	" << truematch[5] << '\n';
+		cout << name << "，你的配对为：\t" << truematch[0] << '\t' << truematch[1] << '\t' << truematch[2] << '\t' << truematch[3] << '\t' << truematch[4] << '\t' << "PB" << '\t' << truematch[5] << '\n';
 		cout << "-------------------------------\n";
 		total = truematch[0] + truematch[1] + truematch[2] + truematch[3] + truematch[4] + truematch[5];	//将对应数字正确的数目相加
-		cout << "\nTotal Matches: " << total << "\n\n";	//显示有几个数字相等
+		cout << "\n合计配对：" << total << "\n\n";	//显示有几个数字相等
 		if (total == 6)	//如果6个数字相等赢得大奖
-		{	cout << "Congratulations " << name << "! You won the jackpot!!";	}
+		{	cout << "恭喜，" << name << "！你赢得了 Jackpot！！";	}
 		else
-			cout << "Sorry " << name << ", you did not win the jackpot!";	//否则未获奖
+			cout << "很遗憾，" << name << "，你没有赢得 Jackpot！";	//否则未获奖
 		cout << "\n****************************\n";
-		cout << name << ", would you like to play the game again? [y or n]" << endl;
+		cout << name << "，你想再游玩一次游戏吗？ [y 或者 n]" << endl;
 		cin >> Reply2;	//询问是否玩下一局
 		play = play + 1;
 	} while (Reply2 == 'Y' || Reply2 == 'y');
-	cout << "\nThank you for playing PowerBall " << name << "! :-)" << endl;
+	cout << "\n感谢你游玩强力球彩票，" << name << "！:)" << endl;
 	exit(1);
 	return 0;
 }
