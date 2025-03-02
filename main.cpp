@@ -10,8 +10,8 @@ using namespace std;
 int isMatch(int test, int cp_num[]);	//是否数字匹配
 int getgamenbr();	//取得一个随机数
 int main()
-{	char name[20], Reply2;
-	int seed, PowerBall, total, play = 1;
+{	char name[20], Reply1, Reply2;
+	int PowerBall, total, play = 1;
 	int truematch[6];
 	int menu();
 	cout << "-------------------------------\n";
@@ -20,9 +20,27 @@ int main()
 	cout << "	-by Chris Grose, edited by Inkorest\n\n";
 	cout << "请输入你的名字 [1 到 20 个字符]：";
 	cin.getline(name, 20);	//输入玩家姓名
-	cout << "\n欢迎 " << name << "！请输入你的幸运数字作为随机数种子：";
-	cin >> seed;	//输入随机数种子
-	srand(seed);
+	cout << "\n欢迎 " << name << "！" << endl;
+	cout << "你想由 CPU 自动生成随机数种子吗？ [y 或者 n]" << endl;
+	label1:
+	cin >> Reply1;
+	switch (Reply1) {
+	case 'Y':
+	case 'y':
+		srand((unsigned)time(NULL));
+		cout << "已经由 CPU 自动生成了随机数种子。" << endl;
+		break;
+	case 'N':
+	case 'n':
+		int seed;
+		cout << "请输入你的幸运数字作为随机数种子：";
+		cin >> seed;	//输入随机数种子
+		srand(seed);
+		break;
+	default:
+		cout << "非法输入，请重新输入："<<endl;
+		goto label1;
+	}
 	do
 	{	int num[5];	//输入所选的数字
 		int cp_num[6];	//CPU产生的数字
