@@ -5,33 +5,13 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <Windows.h>
 using namespace std;
 
-bool isMatch(int, int[]);
-int getGameNbr(int = 33);
-void initRandomSeed() {	//初始化随机数种子
-	char Reply1;
-	cin >> Reply1;
-	switch (Reply1) {
-	case 'Y':
-	case 'y':
-		srand((unsigned)time(NULL));
-		cout << "已经由 CPU 自动生成了随机数种子。\n\n";
-		break;
-	case 'N':
-	case 'n':
-		int seed;
-		cout << "请输入你的幸运数字作为随机数种子：";
-		cin >> seed;	//输入随机数种子
-		srand(seed);
-		cout << "已经由此生成了随机数种子。\n";
-		break;
-	default:
-		cout << "非法输入，请重新输入：" << endl;
-		initRandomSeed();
-	}
-	cout << '\n';
-}
+int menu();
+bool doExists(int, int[]);
+bool doExists(int, int[], int);
+void initRandomSeed();
 
 class CWelfareLot;
 
@@ -43,48 +23,57 @@ private:
 	int m_Redball[6];
 	int m_Blueball;
 public:
-	CCustomer(char name[], int money = 100) {
-		strcpy_s(m_Name, name);
-		m_Money = money;
+	CCustomer(int money = 100) {
+		cout << "请输入您的名字 [1 到 20 个字符]：";
+		cin.getline(m_Name, 20);
 		cout << "\n欢迎 " << m_Name << "！\n\n";
+		m_Money = money;
+		m_Rank = 0;
 	};
-	bool SetNumber() {	//接受彩票投注，成功返回true
-		cout << m_Name << "，请输入你的红色球号码。\n";
-		for (int j = 0; j < 6; j++)	//输入5个所选号码
+	bool SetNumber() {
+		cout << m_Name << "，请输入你的红色球号码 [1 ~ 33]。\n";
+		for (int j = 0; j < 6; j++)
 		{
 			cout << "输入红色球 #" << j + 1 << " 的号码：";
-			while (!(cin >> m_Redball[j]))	//对输入作限制
+			while (!(cin >> m_Redball[j]))	//限制输入
 			{
 				cin.clear();
 				while (!(cin.get() != '\n'))
 					continue;
-				cout << "非法输入，请输入介于 1 和 48 之间的一个数字。\n";
+				cout << "非法输入，请输入介于 1 和 33 之间的一个数字。\n";
 			}
 			if ((m_Redball[j] < 1))
 			{
-				cout << "输入过小，请输入介于 1 和 48 之间的一个数字。\n";
+				cout << "输入过小，请输入介于 1 和 33 之间的一个数字。\n";
 				j--;
 			}
-			if ((m_Redball[j] > 48))
+			if ((m_Redball[j] > 33))
 			{
-				cout << "输入过大，请输入介于 1 和 48 之间的一个数字。\n";
+				cout << "输入过大，请输入介于 1 和 33 之间的一个数字。\n";
 				j--;
 			}
 		}
-		cout << '\n';
-		cout << m_Name << "，请输入你的蓝色球号码：";
-		cin >> m_Blueball;	//要求玩家输入蓝色球号码
+		cout << '\n' << m_Name << "，请输入你的蓝色球号码 [1 ~ 16]：";
+		cin >> m_Blueball;
 		return true;
 	};
-	void ShowChoice() {
-		cout << m_Name << "，你的选择为：\t" << m_Redball[0] << '\t' << m_Redball[1] << '\t' << m_Redball[2] << '\t' 
-			<< m_Redball[3] << '\t' << m_Redball[4] << '\t' << m_Redball[5] << '\t' << "PB " << m_Blueball << '\n';
+	void ShowChoice() const {	//显示用户选择，强制显示两位数
+		cout << "你的选择为：\t红色球：";
+		for (int i = 0; i < 6; i++) {
+			if (m_Redball[i] < 10)
+				cout << '0';
+			cout << m_Redball[i] << '\t';
+		}
+		cout << "蓝色球：";
+		if (m_Blueball < 10)
+			cout << '0';
+		cout << m_Blueball << '\n';
 	};
 	void Compare(CWelfareLot& W);	//比较福彩，赋值中奖等级
-	void ShowMoney() {
-		cout << m_Name << "，你目前的彩金为 " << m_Money << " Z。\n\n";
+	void ShowMoney() const {
+		cout << "您目前的彩金为 " << m_Money << " Z。\n\n";
 	}
-	void ShowRank() {	//根据中奖等级计算奖金，输出结果
+	void ShowRank() const {	//根据中奖等级计算奖金，输出结果
 		cout << "\n合计配对：" << m_Rank << "\n\n";
 		switch (m_Rank) {
 		case 6:
@@ -109,59 +98,60 @@ private:
 	int m_LotRed[6];
 	int m_LotBlue;
 public:
-	CWelfareLot() {	//CPU生成大奖号码
-		m_LotRed[0] = getGameNbr();
-		m_LotRed[1] = getGameNbr();
-		m_LotRed[2] = getGameNbr();
-		m_LotRed[3] = getGameNbr();
-		m_LotRed[4] = getGameNbr();
-		m_LotRed[5] = getGameNbr();
-		m_LotBlue = getGameNbr(16);
-	};
-	void SetLot() {
-		int nRnd, nNum;
-		for (int i = 0; i < 6; i++) {	//要开出6个数字
-			nRnd = rand();	//随机取循环次数，数字变换的时间长度是随机的
-			for (int j = 0; j < nRnd; j++) {
-				nNum = rand() % 21;	//随机取0~20之间的数字进行变换
-				if (nNum < 10)
-					cout << nNum << '\b';	//当取的数字小于10，即一位数，显示后光标左移一位，再继续变换的数字将原数字覆盖，出现摇奖效果
-				else
-					cout << nNum << "\b\b";	//当取的数字是两位数，左移两位
-			}
-			cout << nNum << " ";
-			m_LotRed[i] = nNum;	//变换到最后的数字即为大奖数字
+	CWelfareLot() {	//生成大奖号码
+		int tempNum;
+		for (int i = 0; i < 6; i++) {
+			do	//防止红色球重复
+				tempNum = rand() % 33 + 1;
+			while (doExists(tempNum, m_LotRed, i));
+			m_LotRed[i] = tempNum;
 		}
-	};	//开奖过程
-	void PrintLot() {
-		cout << "CPU 的选择为：\t" << m_LotRed[0] << '\t' << m_LotRed[1] << '\t' << m_LotRed[2] << '\t' 
-			<< m_LotRed[3] << '\t' << m_LotRed[4] << '\t' << m_LotRed[5] << '\t' << "PB " << m_LotBlue << '\n';
+		m_LotBlue = rand() % 16 + 1;
+	};
+	void SetAndPrintLot() const {	//模拟并显示开奖
+		int rndTime, rndNum;
+		cout << "大奖号码为：\t红色球：";
+		//滚动显示红色球号码
+		for (int i = 0; i < 6; i++) {
+			rndTime = rand() % 10 + 6;	//限制滚动显示次数（6~15）
+			for (int j = 0; j < rndTime; j++) {
+				rndNum = rand() % 33 + 1;
+				rndNum < 10 ? cout << '0' << rndNum << "\b\b" : cout << rndNum << "\b\b";
+				Sleep(150);
+			}
+			if (m_LotRed[i] < 10)
+				cout << '0';
+			cout << m_LotRed[i] << '\t';
+		}
+		cout << "蓝色球：";
+		//滚动显示蓝色球号码
+		rndTime = rand() % 10 + 6;	//限制滚动显示次数（6~15）
+		for (int i = 0; i < rndTime; i++) {
+			rndNum = rand() % 16 + 1;
+			rndNum < 10 ? cout << '0' << rndNum << "\b\b" : cout << rndNum << "\b\b";
+			Sleep(150);
+		}
+		if (m_LotBlue < 10)
+			cout << '0';
+		cout << m_LotBlue << '\n';
 	};
 	friend void CCustomer::Compare(CWelfareLot&);	//判断用户是否中奖
 };
 
 void CCustomer::Compare(CWelfareLot& W) {
-	int truematch[6];
-	truematch[0] = isMatch(m_Redball[0], W.m_LotRed);
-	truematch[1] = isMatch(m_Redball[1], W.m_LotRed);
-	truematch[2] = isMatch(m_Redball[2], W.m_LotRed);
-	truematch[3] = isMatch(m_Redball[3], W.m_LotRed);
-	truematch[4] = isMatch(m_Redball[4], W.m_LotRed);
-	truematch[5] = (m_Blueball == W.m_LotBlue);
-	m_Rank = truematch[0] + truematch[1] + truematch[2] + truematch[3] + truematch[4] + truematch[5];
+	for (int i = 0; i < 6; i++)
+		m_Rank += doExists(m_Redball[i], W.m_LotRed);
+	m_Rank += (m_Blueball == W.m_LotBlue);
 };
 
 int main() {
-	char name[20];
 	int play = 1;
-	int menu();
 	cout << "-------------------------------\n";
 	cout << "* 欢迎来到福彩-双色球！ *\n";
 	cout << "-------------------------------\n";
 	cout << "	-by Inkorest of NJUST\n\n";
-	cout << "请输入您的名字 [1 到 20 个字符]：";
-	cin.getline(name, 20);
-	CCustomer user(name);
+
+	CCustomer user;
 
 	cout << "要由 CPU 自动生成随机数种子吗？ [y 或者 n]\n";
 	initRandomSeed();
@@ -176,29 +166,63 @@ int main() {
 		cout << "\n****************************\n";
 		cout << '\n';
 		cout << "-------------------------------\n";
-		wLot.PrintLot();
-		cout << "-------------------------------\n";
 		user.ShowChoice();
 		cout << "-------------------------------\n";
+		wLot.SetAndPrintLot();
+		cout << "-------------------------------\n";
+		Sleep(750);
 		user.Compare(wLot);
 		user.ShowRank();
 		cout << "\n****************************\n";
-		cout << name << "，你想再游玩一次游戏吗？ [y 或者 [其他]]" << endl;
+		cout << "你想再游玩一次游戏吗？ [y 或者 [其他]]" << endl;
 		cin >> Reply2;
 		cout << '\n' << '\n';
 		play++;
 	} while (Reply2 == 'Y' || Reply2 == 'y');
-	cout << "感谢您游玩福彩-双色球，" << name << "！:)" << endl;
+	cout << "感谢您游玩福彩-双色球！:)" << endl;
 	exit(1);
 	return 0;
 }
 
-int getGameNbr(int range) {
-	return(rand() % range + 1);
+int menu() {
+	return 0;
 }
-bool isMatch(int temp, int cp_num[]){
-	for(int i=0;i<5;i++)
-		if (temp == cp_num[i])
+
+static void initRandomSeed() {	//初始化随机数种子
+	char Reply1;
+	cin >> Reply1;
+	switch (Reply1) {
+	case 'Y':
+	case 'y':
+		srand((unsigned)time(NULL));
+		cout << "已经由 CPU 自动生成了随机数种子。\n\n";
+		break;
+	case 'N':
+	case 'n':
+		int seed;
+		cout << "请输入你的幸运数字作为随机数种子：";
+		cin >> seed;
+		srand(seed);
+		cout << "已经由此生成了随机数种子。\n";
+		break;
+	default:
+		cout << "非法输入，请重新输入：" << endl;
+		initRandomSeed();
+	}
+	cout << '\n';
+}
+
+bool doExists(int num, int array[]){
+	int size = sizeof(array) / sizeof(array[0]);
+	for (int i = 0; i < size; i++)
+		if (num == array[i])
+			return true;
+	return false;
+}
+
+bool doExists(int num, int array[], int arrayN) {
+	for (int i = 0; i < arrayN; i++)
+		if (num == array[i])
 			return true;
 	return false;
 }
