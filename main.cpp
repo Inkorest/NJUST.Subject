@@ -69,11 +69,11 @@ public:
 			cout << '0';
 		cout << m_Blueball << '\n';
 	};
-	void Compare(CWelfareLot& W);	//比较福彩，赋值中奖等级
+	void Compare(CWelfareLot& W);	//比较号码
 	void ShowMoney() const {
 		cout << "您目前的彩金为 " << m_Money << " Z。\n\n";
 	}
-	void ShowRank() const {	//根据中奖等级计算奖金，输出结果
+	void ShowRank() const {	//计算奖金并输出结果
 		cout << "\n合计配对：" << m_Rank << "\n\n";
 		switch (m_Rank) {
 		case 6:
@@ -135,7 +135,7 @@ public:
 			cout << '0';
 		cout << m_LotBlue << '\n';
 	};
-	friend void CCustomer::Compare(CWelfareLot&);	//判断用户是否中奖
+	friend void CCustomer::Compare(CWelfareLot&);
 };
 
 void CCustomer::Compare(CWelfareLot& W) {
