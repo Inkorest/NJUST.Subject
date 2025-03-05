@@ -1,10 +1,6 @@
 /*	福彩游戏	*/
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
-#include <cmath>
-#include <iomanip>
 #include <iostream>
+#include <time.h>
 #include <Windows.h>
 using namespace std;
 
@@ -22,6 +18,8 @@ private:
 	int m_Rank;
 	int m_Redball[6];
 	int m_Blueball;
+	int m_RedMatches = 0;
+	bool m_BlueMatches = false;
 public:
 	CCustomer(int money = 100) {
 		cout << "请输入您的名字 [1 到 20 个字符]：";
@@ -30,66 +28,65 @@ public:
 		m_Money = money;
 		m_Rank = 0;
 	};
-	bool SetNumber() {
-		cout << m_Name << "，请输入你的红色球号码 [1 ~ 33]。\n";
-		for (int j = 0; j < 6; j++)
-		{
-			cout << "输入红色球 #" << j + 1 << " 的号码：";
-			while (!(cin >> m_Redball[j]))	//限制输入
-			{
-				cin.clear();
-				while (!(cin.get() != '\n'))
-					continue;
-				cout << "非法输入，请输入介于 1 和 33 之间的一个数字。\n";
-			}
-			if ((m_Redball[j] < 1))
-			{
-				cout << "输入过小，请输入介于 1 和 33 之间的一个数字。\n";
-				j--;
-			}
-			if ((m_Redball[j] > 33))
-			{
-				cout << "输入过大，请输入介于 1 和 33 之间的一个数字。\n";
-				j--;
-			}
+	int CheckInput(int range) {	//限制输入
+		int num;
+		while (!(cin >> num) || num < 1 || num > range) {
+			cin.clear();
+			while (!(cin.get() != '\n'))
+				continue;
+			cout << "非法输入，请输入介于 1 和 " << range << " 之间的一个数字：";
 		}
-		cout << '\n' << m_Name << "，请输入你的蓝色球号码 [1 ~ 16]：";
-		cin >> m_Blueball;
+		return num;
+	}
+	bool SetNumber() {	//接受下注
+		cout << m_Name << "，请输入你的红色球号码 [1 ~ 33]。\n";
+		for (int i = 0; i < 6; i++)
+		{
+			cout << "输入红色球 #" << i + 1 << " 的号码：";
+			m_Redball[i] = CheckInput(33);
+		}
+		cout << "请输入你的蓝色球号码 [1 ~ 16]：";
+		m_Blueball = CheckInput(16);
 		return true;
 	};
 	void ShowChoice() const {	//显示用户选择，强制显示两位数
 		cout << "你的选择为：\t红色球：";
-		for (int i = 0; i < 6; i++) {
-			if (m_Redball[i] < 10)
-				cout << '0';
-			cout << m_Redball[i] << '\t';
-		}
-		cout << "蓝色球：";
-		if (m_Blueball < 10)
-			cout << '0';
-		cout << m_Blueball << '\n';
+		for (int i = 0; i < 6; i++)
+			cout << (m_Redball[i] < 10 ? '0' : '\0') << m_Redball[i] << '\t';
+		cout << "蓝色球：" << (m_Blueball < 10 ? '0' : '\0') << m_Blueball << '\n';
 	};
 	void Compare(CWelfareLot& W);	//比较号码
 	void ShowMoney() const {
 		cout << "您目前的彩金为 " << m_Money << " Z。\n\n";
 	}
 	void ShowRank() const {	//计算奖金并输出结果
-		cout << "\n合计配对：" << m_Rank << "\n\n";
-		switch (m_Rank) {
-		case 6:
-			cout << "恭喜，" << m_Name << "！你赢得了 Jackpot！！";
-			break;
-		case 5:
-		case 4:
-			cout << "恭喜，" << m_Name << "！你赢得了二等奖！";
-			break;
-		case 3:
-		case 2:
-			cout << "恭喜，" << m_Name << "！你赢得了三等奖！";
-			break;
-		default:
-			cout << "很遗憾，" << m_Name << "，你没有赢得奖金！";
+		cout << m_Name << "，你的投注结果为：\n红色球相同个数：" << m_RedMatches << "，"
+			"蓝色球号码" << (m_BlueMatches ? "相同" : "不相同") << "。\n\n";
+		if (m_Rank) {
+			cout << "恭喜，" << m_Name << "！你赢得了";
+			switch (m_Rank) {
+			case 6:
+				cout << "一等奖！!";
+				break;
+			case 5:
+				cout << "二等奖！";
+				break;
+			case 4:
+				cout << "三等奖！";
+				break;
+			case 3:
+				cout << "四等奖！";
+				break;
+			case 2:
+				cout << "五等奖！";
+				break;
+			case 1:
+				cout << "六等奖！";
+				break;
+			}
 		}
+		else
+			cout << "很遗憾，" << m_Name << "，你没有赢得奖金！";
 	};
 };
 
@@ -119,29 +116,37 @@ public:
 				rndNum < 10 ? cout << '0' << rndNum << "\b\b" : cout << rndNum << "\b\b";
 				Sleep(150);
 			}
-			if (m_LotRed[i] < 10)
-				cout << '0';
-			cout << m_LotRed[i] << '\t';
+			cout << (m_LotRed[i] < 10 ? '0' : '\0') << m_LotRed[i] << '\t';
 		}
 		cout << "蓝色球：";
 		//滚动显示蓝色球号码
 		rndTime = rand() % 10 + 6;	//限制滚动显示次数（6~15）
 		for (int i = 0; i < rndTime; i++) {
 			rndNum = rand() % 16 + 1;
-			rndNum < 10 ? cout << '0' << rndNum << "\b\b" : cout << rndNum << "\b\b";
+			cout << (rndNum < 10 ? '0' : '\0') << rndNum << "\b\b";
 			Sleep(150);
 		}
-		if (m_LotBlue < 10)
-			cout << '0';
-		cout << m_LotBlue << '\n';
+		cout << (m_LotBlue < 10 ? '0' : '\0') << m_LotBlue << '\n';
 	};
 	friend void CCustomer::Compare(CWelfareLot&);
 };
 
-void CCustomer::Compare(CWelfareLot& W) {
+void CCustomer::Compare(CWelfareLot& W) {	//计算奖金等级
 	for (int i = 0; i < 6; i++)
-		m_Rank += doExists(m_Redball[i], W.m_LotRed);
-	m_Rank += (m_Blueball == W.m_LotBlue);
+		m_RedMatches += doExists(m_Redball[i], W.m_LotRed);
+	m_BlueMatches += (m_Blueball == W.m_LotBlue);
+	switch (m_RedMatches) {	//由双色球规则计算奖等
+	case 6:
+		m_Rank += 2;
+	case 5:
+		m_Rank++;
+	case 4:
+		m_Rank++;
+	case 3:
+		m_Rank++;
+	default:
+		m_Rank += m_BlueMatches;
+	}
 };
 
 int main() {
@@ -169,17 +174,17 @@ int main() {
 		user.ShowChoice();
 		cout << "-------------------------------\n";
 		wLot.SetAndPrintLot();
-		cout << "-------------------------------\n";
-		Sleep(750);
+		cout << "-------------------------------\n\n";
+		Sleep(500);
 		user.Compare(wLot);
 		user.ShowRank();
 		cout << "\n****************************\n";
-		cout << "你想再游玩一次游戏吗？ [y 或者 [其他]]" << endl;
+		cout << "你想再游玩一次游戏吗？ [y 或者 [其他]]\n";
 		cin >> Reply2;
 		cout << '\n' << '\n';
 		play++;
 	} while (Reply2 == 'Y' || Reply2 == 'y');
-	cout << "感谢您游玩福彩-双色球！:)" << endl;
+	cout << "感谢您游玩福彩-双色球！:)\n";
 	exit(1);
 	return 0;
 }
