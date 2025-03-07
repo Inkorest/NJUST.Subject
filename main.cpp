@@ -2,6 +2,7 @@
 #include <iostream>
 #include <time.h>
 #include <Windows.h>
+#include <conio.h>
 using namespace std;
 
 int seed = (unsigned)time(NULL);	//随机数种子
@@ -28,9 +29,10 @@ private:
 	int m_BetMulti;
 public:
 	CCustomer(int money = 100) :m_Money(money), m_Prize(0), m_RedMatches(0), m_BlueMatch(0), m_BetMulti(1) {
-		cout << "请输入您的名字 [1 到 20 个字符]：";
+		system("cls");
+		cout << "请输入您的名字 [1 到 20 个字符]：\n";
 		cin.getline(m_Name, 20);
-		cout << "\n欢迎 " << m_Name << "！\n";
+		cout << "\n欢迎 " << m_Name << "！\n\n";
 	};
 	int CheckInput(int range) {	//限制输入
 		int num;
@@ -43,12 +45,15 @@ public:
 	}
 	void SetNumber() {	//接受投注
 		int maxBetMulti = m_Money / 2 > 99 ? 99 : m_Money / 2;
-		cout << "您可选择单倍投注或多倍投注，每注售价 2 z。单倍投注请输入 1，多倍投注请输入投注倍数 [2~" << maxBetMulti << "]：";
+		cout << "您可选择单倍投注或多倍投注，每注售价 2 z。\n";
+		cout << "[1] 单倍投注\n";
+		cout << "[2~" << maxBetMulti << "] 多倍投注倍数\n";
+		cout << "请输入命令：";
 		m_BetMulti = CheckInput(maxBetMulti);
 		m_Money -= 2 * m_BetMulti;
-		cout << "成功接受投注。";
+		cout << "\n成功接受投注。";
 		PrintMoney();
-		cout << '\n' << m_Name << "，请输入你的红色球号码 [1 ~ 33]。\n";
+		cout << "\n请输入你的红色球号码 [1 ~ 33]。\n";
 		for (int i = 0; i < 6; i++)
 		{
 			cout << "输入红色球 #" << i + 1 << " 的号码：";
@@ -95,7 +100,6 @@ public:
 		}
 		else
 			cout << "很遗憾，" << m_Name << "，你没有赢得奖金！";
-		cout << '\n';
 	};
 	void CalcRewards() {	//计算奖金并重置奖级变量
 		int reward = 0;
@@ -124,10 +128,22 @@ public:
 			cout << "奖金 " << reward << " z 已经发放到您的余额。";
 			PrintMoney();
 		}
+		else if (m_Money < 2)
+			GameOver();
 		m_Prize = 0;
 		m_RedMatches = 0;
 		m_BlueMatch = 0;
 	};
+	void GameOver() {	//余额不足，游戏结束
+		cout << "\n\n很遗憾，您的余额不足以再进行投注。游戏结束。";
+		Sleep(5000);
+		system("cls");
+		cout << "感谢您游玩福彩-双色球！:)\n";
+		exit(0);
+	}
+	void ShowInfo() {
+		cout << "欢迎你，" << m_Name << "\t\t您目前的余额为 " << m_Money << " z";
+	}
 };
 
 class CWelfareLot {
@@ -192,12 +208,16 @@ void CCustomer::Compare(CWelfareLot& W) {	//计算奖金等级
 int main() {
 	char div[86] = "-----------------------------------------------------------------------------------\n";
 	int play = 1;
-	cout << div;
-	cout << "** 欢迎来到福彩-双色球！ **\n";
-	cout << "	-by Inkorest of NJUST\n";
 	cout << div << '\n';
-	printMenu(1);
+	cout << "** 欢迎来到福彩-双色球！ **\n";
 	cout << '\n';
+	cout << "	-by Inkorest of NJUST\n";
+	cout << '\n';
+	cout << div << '\n';
+	cout << '\n';
+	cout << "请按任意键开始. . . ";
+	_getch();
+	printMenu(1);
 
 	CCustomer user;
 
@@ -207,14 +227,17 @@ int main() {
 	cout << "[N] 否\n";
 	cout << "请输入命令：";
 	initRandomSeed();
+	Sleep(1500);
 
 	char reply;
 	do {
 		CWelfareLot wLot;
+		system("cls");
 		cout << div;
 		cout << "游玩局数 #" << play << '\n';
 		cout << div << '\n';
 		user.PrintMoney();
+		cout << '\n';
 		user.SetNumber();
 		cout << '\n' << div;
 		user.PrintSelection();
@@ -224,7 +247,9 @@ int main() {
 		Sleep(500);
 		user.Compare(wLot);
 		user.PrintPrize();
+		cout << '\n';
 		user.CalcRewards();
+		cout << '\n';
 		cout << '\n';
 		cout << "你想再游玩一次游戏吗？\n";
 		cout << "[Y] 确认\n";
@@ -232,23 +257,24 @@ int main() {
 		cout << "[Q] 退出游戏\n";
 		cout << "请输入命令：";
 		reply = getReply();
-		cout << "\n";
 		if (reply == 'M')
-			printMenu(2);
+			printMenu(0);
 		srand(++seed);
 		play++;
 	} while (reply != 'Q');
 
+	system("cls");
 	cout << "感谢您游玩福彩-双色球！:)\n";
 	return 0;
 }
 
 void printMenu(int status) {
-	cout << "---------- 游戏菜单 ----------\n";
-	cout << "[G] " << (status == 1 ? "开始" : "继续") << "游戏\n";
+	system("cls");
+	cout << "------------------------------------ 游戏菜单 ------------------------------------\n\n";
+	cout << "[G] " << (status ? "开始" : "继续") << "游戏\n";
 	cout << "[R] 查看游戏规则\n";
 	cout << "[C] 输入管理员密码\n";
-	cout << "[Q] 退出游戏\n";
+	cout << "[Q] 退出游戏\n\n";
 	cout << "请输入命令：";
 	menuCommand();
 }
@@ -265,7 +291,7 @@ void menuCommand() {
 	case 'R':
 	case 'r':
 		printRule();
-		printMenu(2);
+		printMenu(0);
 		break;
 	case 'C':
 	case 'c':
@@ -273,7 +299,8 @@ void menuCommand() {
 		break;
 	case 'Q':
 	case 'q':
-		cout << "\n感谢您游玩福彩-双色球！:)\n";
+		system("cls");
+		cout << "感谢您游玩福彩-双色球！:)\n";
 		exit(0);
 	default:
 		cout << "非法输入。请重新输入：";
@@ -282,7 +309,7 @@ void menuCommand() {
 }
 
 void printRule() {
-	cout << '\n';
+	system("cls");
 	cout << "------------------------------- 福彩-双色球游戏规则 -------------------------------\n";
 	cout << "1. 下注：用户通过支付余额进行投注（可选单倍投注 / 多倍投注* ），然后在 33 个红色球号\n";
 	cout << "	码中挑选 6 个、在 16 个蓝色球号码中挑选 1 个作为自己的投注号码。\n";
@@ -290,6 +317,7 @@ void printRule() {
 	cout << "	号码。\n";
 	cout << "3. 结算：依据用户与大奖号码的匹配情况计算用户的中奖等级，并发放奖金（如中奖）。\n";
 	cout << "*多倍投注：按单注售价的复倍（最大 99 倍）投注。若中奖，奖金也将变为复倍。\n";
+	cout << '\n';
 	cout << '\n';
 	cout << "--------------------- 奖金对照表 ---------------------\n";
 	cout << "奖级\t奖金\t中奖条件（红色球配对数/蓝色球配对情况）\n";
@@ -300,8 +328,8 @@ void printRule() {
 	cout << "五等奖\t10 z\t4/F 或者 3/S\n";
 	cout << "六等奖\t5 z\t2/S 或者 1/S 或者 0/S\n";
 	cout << '\n';
-	system("pause");
 	cout << '\n';
+	system("pause");
 }
 
 void passcode() {
@@ -322,18 +350,19 @@ char getReply() {
 static void initRandomSeed() {	//初始化随机数种子
 	char reply;
 	cin >> reply;
+	cout << '\n';
 	while (cin.get() != '\n')
 		reply = '\0';
 	switch (reply) {
 	case 'Y':
 	case 'y':
-		cout << "已经由 CPU 自动生成了随机数种子。\n\n";
+		cout << "已经由 CPU 自动生成了随机数种子。";
 		break;
 	case 'N':
 	case 'n':
 		cout << "请输入你的幸运数字作为随机数种子：";
 		cin >> seed;
-		cout << "已经由此生成了随机数种子。\n\n";
+		cout << "已经由此生成了随机数种子。";
 		break;
 	default:
 		cout << "非法输入。请重新输入：";
