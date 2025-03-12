@@ -462,15 +462,16 @@ void CCustomer::ManualSet() {	//手动设定大奖号码
 			}
 			break;
 		case 7:
-			if (!m_ManualSet++)
+			if (!m_ManualSet++) {
 				cout << "已启用预设的大奖号码。";
+				if (m_ForceSN) {
+					cout << "\n[警告] 由于强制大奖号码与投注号码相同已启用，此功能被屏蔽。";
+					Sleep(1500);
+				}
+			}
 			else {
 				m_ManualSet = false;
 				cout << "已禁用预设的大奖号码。";
-			}
-			if (m_ManualSet) {
-				cout << "\n[警告] 由于强制大奖号码与投注号码相同已启用，此功能被屏蔽。";
-				Sleep(1500);
 			}
 			break;
 		case 8:
@@ -800,13 +801,12 @@ int checkInput(int range, string text, int exit, string altText, int alter, vect
 				continue;
 			}
 		}
-		if (range)
-			if (num < 1 || num > range) {
-				cout << "\033[F\r" << blank << '\r';
-				cout << "非法输入。请输入介于 1 和 " << range << " 之间的一个数字。";
-				Sleep(1500);
-				continue;
-			}
+		if (range && (num < 1 || num > range)) {
+			cout << "\033[F\r" << blank << '\r';
+			cout << "非法输入。请输入介于 1 和 " << range << " 之间的一个数字。";
+			Sleep(1500);
+			continue;
+		}
 		if (!isDigit) {
 			cout << "\033[F\r" << blank << '\r';
 			cout << "非法输入。请重新输入。";
